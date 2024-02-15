@@ -56,7 +56,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         if videoPlayer.is_playing:
             result = {'status': 'playing'}
         else:
-            videoPlayer.show_activity(activity)
+            # videoPlayer.show_activity(activity)
+            pass
         #
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
@@ -104,7 +105,8 @@ class VideoPlayer:
 #        self.show_video_and_wait(activities['activity_101']['video'])
 #        self.show_video_and_wait(activities['activity_201']['video'])
         while not event.is_set():
-            cv2.destroyAllWindows()
+            pass
+        cv2.destroyAllWindows()
         logging.info("VideoPlayer finished")
 
 
