@@ -56,8 +56,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         if videoPlayer.is_playing:
             result = {'status': 'playing'}
         else:
-            # videoPlayer.show_activity(activity)
-            pass
+            videoPlayer.show_activity(activity)
         #
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
@@ -82,7 +81,9 @@ class VideoPlayer:
     is_playing = False
 
     def show_activity(self, activity_name):
-        self.show_video_and_wait(activities[activity_name]['video'])
+        with self._lock:
+            self._activity_name = activity_name
+        # logging.info("new activity_name %s", self._activity_name)
 
     def show_video_and_wait(self, videoName: str):
         self.is_playing = True
@@ -97,15 +98,23 @@ class VideoPlayer:
         cap.release()
         self.is_playing = False
 
+    _lock = threading.Lock()
+    _activity_name = None
+
     def run(self, event):
         cv2.namedWindow(self.win_name, cv2.WINDOW_NORMAL)
         cv2.setWindowProperty(self.win_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         logging.info("VideoPlayer started")
-        self.show_video_and_wait(activities['activity_300']['video'])
-#        self.show_video_and_wait(activities['activity_101']['video'])
-#        self.show_video_and_wait(activities['activity_201']['video'])
+        self._activity_name = 'activity_300'
+        #        self.show_video_and_wait(activities['activity_300']['video'])
+        #        self.show_video_and_wait(activities['activity_101']['video'])
+        #        self.show_video_and_wait(activities['activity_201']['video'])
         while not event.is_set():
-            pass
+            if self._activity_name is not None:
+                self.show_video_and_wait(activities[self._activity_name]['video'])
+                self._activity_name = None
+            else:
+                pass
         cv2.destroyAllWindows()
         logging.info("VideoPlayer finished")
 
@@ -124,7 +133,7 @@ if __name__ == "__main__":
         executor.submit(webService.run, event)
         executor.submit(videoPlayer.run, event)
 
-        #input("Press Enter to continue...")
+        # input("Press Enter to continue...")
         os.system('pause')
         event.set()
 
