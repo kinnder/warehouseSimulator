@@ -6,6 +6,7 @@ import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
 import cv2
+import requests
 
 activities = {'activity_101': {'video': 'Container_01_MoveToTable.mp4', 'duration': 40},
               'activity_201': {'video': 'Container_01_MoveToRack.mp4', 'duration': 40},
@@ -63,6 +64,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 class WebService:
+    def __init__(self, videoPlayer):
+        self._videoPlayer = videoPlayer
+
     videoPlayer: None
     _httpd: None
 
@@ -74,6 +78,9 @@ class WebService:
         # TODO : сюда доходит только после fake-request
         # https://stackoverflow.com/questions/268629/how-to-stop-basehttpserver-serve-forever-in-a-basehttprequesthandler-subclass
         logging.info("WebService finished")
+
+    def stop(self):
+        requests.get('http://localhost:8000/')
 
 
 class VideoPlayer:
@@ -118,23 +125,26 @@ class VideoPlayer:
         cv2.destroyAllWindows()
         logging.info("VideoPlayer finished")
 
+    def stop(self):
+        pass
+
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO, datefmt="%H:%M:%S")
+    logging.getLogger().setLevel(logging.INFO)
 
-    webService = WebService()
     videoPlayer = VideoPlayer()
+    webService = WebService(videoPlayer)
     event = threading.Event()
-
-    webService.videoPlayer = videoPlayer
-    logging.info("WarehouseSimulator started")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         executor.submit(webService.run, event)
         executor.submit(videoPlayer.run, event)
+        logging.info("WarehouseSimulator started")
 
         # input("Press Enter to continue...")
         os.system('pause')
         event.set()
-
-    logging.info("WarehouseSimulator finished")
+        webService.stop()
+        videoPlayer.stop()
+        logging.info("WarehouseSimulator finished")
