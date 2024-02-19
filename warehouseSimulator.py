@@ -44,6 +44,7 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
+        #TODO в help добавить / запрос
         result = f"""Wellcome to WarehouseSimulator, list of supported requests:
 /status
     check status of warehouse
@@ -81,9 +82,9 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
                 containerId = int(parameters[self._c_containerId][0])
         # processing request
         activity = f'activity_{operationId * 100 + containerId}'
-        print(activity)
         if activity not in activities.keys():
             activity = NO_OPERATION
+            #TODO operationId выставлять равным NO_OPERATION
         timeEstimated = activities[activity]['duration']
         result = {f'{self._c_operationId}': operationId,
                   f'{self._c_containerId}': containerId,
@@ -166,8 +167,8 @@ class VideoPlayer:
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO, datefmt="%H:%M:%S")
-    # logging.getLogger().setLevel(logging.INFO)
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
+    # logging.getLogger().setLevel(logging.DEBUG)
 
     videoPlayer = VideoPlayer()
     webService = WebService(videoPlayer)
