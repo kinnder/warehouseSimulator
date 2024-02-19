@@ -68,23 +68,25 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 class WebService:
-    def __init__(self, video_player):
-        self._videoPlayer = video_player
+    _serverName = '0.0.0.0'
+    _serverPort = 8000
 
-    videoPlayer: None
+    def __init__(self, videoPlayer):
+        self._videoPlayer = videoPlayer
+
+    _videoPlayer: None
     _httpd: HTTPServer = None
 
     def run(self, event):
-        self._httpd = HTTPServer(('localhost', 8000), SimpleHTTPRequestHandler)
+        self._httpd = HTTPServer((self._serverName, self._serverPort), SimpleHTTPRequestHandler)
         logging.debug("WebService started")
         while not event.is_set():
             self._httpd.handle_request()
-        # TODO : сюда доходит только после fake-request
-        # https://stackoverflow.com/questions/268629/how-to-stop-basehttpserver-serve-forever-in-a-basehttprequesthandler-subclass
+        self._httpd.server_close()
         logging.debug("WebService finished")
 
     def stop(self):
-        requests.get('http://localhost:8000/')
+        requests.get(f'http://localhost:{self._serverPort}')
 
 
 class VideoPlayer:
