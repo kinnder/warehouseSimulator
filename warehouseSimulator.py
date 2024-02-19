@@ -15,6 +15,10 @@ activities = {'activity_101': {'video': 'Container_01_MoveToTable.mp4', 'duratio
 
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        logging.info(f"{self.client_address[0]} - {args[0]}")
+        # BaseHTTPRequestHandler.log_message(self, format, *args)
+
     def do_GET(self):
         if self.path.startswith('/command'):
             self._do_command()
@@ -64,20 +68,20 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 class WebService:
-    def __init__(self, videoPlayer):
-        self._videoPlayer = videoPlayer
+    def __init__(self, video_player):
+        self._videoPlayer = video_player
 
     videoPlayer: None
-    _httpd: None
+    _httpd: HTTPServer = None
 
     def run(self, event):
         self._httpd = HTTPServer(('localhost', 8000), SimpleHTTPRequestHandler)
-        logging.info("WebService started")
+        logging.debug("WebService started")
         while not event.is_set():
             self._httpd.handle_request()
         # TODO : сюда доходит только после fake-request
         # https://stackoverflow.com/questions/268629/how-to-stop-basehttpserver-serve-forever-in-a-basehttprequesthandler-subclass
-        logging.info("WebService finished")
+        logging.debug("WebService finished")
 
     def stop(self):
         requests.get('http://localhost:8000/')
@@ -111,7 +115,7 @@ class VideoPlayer:
     def run(self, event):
         cv2.namedWindow(self.win_name, cv2.WINDOW_NORMAL)
         cv2.setWindowProperty(self.win_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        logging.info("VideoPlayer started")
+        logging.debug("VideoPlayer started")
         self._activity_name = 'activity_300'
         #        self.show_video_and_wait(activities['activity_300']['video'])
         #        self.show_video_and_wait(activities['activity_101']['video'])
@@ -123,7 +127,7 @@ class VideoPlayer:
             else:
                 pass
         cv2.destroyAllWindows()
-        logging.info("VideoPlayer finished")
+        logging.debug("VideoPlayer finished")
 
     def stop(self):
         pass
@@ -142,8 +146,8 @@ if __name__ == "__main__":
         executor.submit(videoPlayer.run, event)
         logging.info("WarehouseSimulator started")
 
-        # input("Press Enter to continue...")
-        os.system('pause')
+        input("Press Enter to stop...\n")
+        # os.system('pause')
         event.set()
         webService.stop()
         videoPlayer.stop()
