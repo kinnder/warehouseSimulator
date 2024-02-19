@@ -1,10 +1,10 @@
 import concurrent.futures
 import json
 import logging
-import os
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
+
 import cv2
 import requests
 
@@ -15,8 +15,15 @@ activities = {'activity_101': {'video': 'Container_01_MoveToTable.mp4', 'duratio
 
 
 class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
-    _p_operationId = 'operationId'
-    _p_containerId = 'containerId'
+    _c_operationId = 'operationId'
+    _c_containerId = 'containerId'
+
+    _c_status = 'status'
+    _c_status_playing = 'playing'
+    _c_status_finished = 'finished'
+    _c_status_started = 'started'
+
+    _c_timeEstimated = 'timeEstimated'
 
     def log_message(self, format, *args):
         logging.info(f"{self.client_address[0]} - {args[0]}")
@@ -37,12 +44,12 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         result = f"""Wellcome to WarehouseSimulator, list of supported requests:
 /status
     check status of warehouse
-/command?{self._p_operationId}=1&{self._p_containerId}=1
+/command?{self._c_operationId}=1&{self._c_containerId}=1
     call the operation, where
-    {self._p_operationId}: [1, 2]
+    {self._c_operationId}: [1, 2]
         1 - move container to table
         2 - move container to rack
-    {self._p_containerId}: [1, 60]
+    {self._c_containerId}: [1, 60]
 """
         self.wfile.write(result.encode('utf-8'))
 
@@ -52,28 +59,27 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def _do_status(self):
-        # TODO: переделать на очередь сообщений
         # operation
-        status = 'playing' if videoPlayer.is_playing else 'finished'
+        status = self._c_status_playing if videoPlayer.is_playing else self._c_status_finished
         #
-        result = {'status': status}
+        result = {f'{self._c_status}': status}
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
 
     def _do_command(self):
         parameters = parse_qs(urlparse(self.path).query)
-        operationId = int(parameters[self._p_operationId][0]) if parameters[self._p_operationId][0].isdigit() else None
-        containerId = int(parameters[self._p_containerId][0]) if parameters[self._p_containerId][0].isdigit() else None
-        # TODO: переделать на очередь сообщений
+        operationId = int(parameters[self._c_operationId][0]) if parameters[self._c_operationId][0].isdigit() else None
+        containerId = int(parameters[self._c_containerId][0]) if parameters[self._c_containerId][0].isdigit() else None
         # operation
         activity_id = operationId * 100 + containerId
         activity = f'activity_{activity_id}'
         timeEstimated = activities[activity]['duration']
-        result = {f'{self._p_operationId}': operationId,
-                  f'{self._p_containerId}': containerId,
-                  'timeEstimated': timeEstimated}
+        result = {f'{self._c_operationId}': operationId,
+                  f'{self._c_containerId}': containerId,
+                  f'{self._c_timeEstimated}': timeEstimated,
+                  f'{self._c_status}': self._c_status_started}
         if videoPlayer.is_playing:
-            result = {'status': 'playing'}
+            result = {f'{self._c_status}': self._c_status_playing}
         else:
             videoPlayer.show_activity(activity)
         #
