@@ -14,7 +14,10 @@ activities = {'activity_101': {'video': 'Container_01_MoveToTable.mp4', 'duratio
               }
 
 
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
+    _p_operationId = 'operationId'
+    _p_containerId = 'containerId'
+
     def log_message(self, format, *args):
         logging.info(f"{self.client_address[0]} - {args[0]}")
         # BaseHTTPRequestHandler.log_message(self, format, *args)
@@ -31,7 +34,16 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
-        result = "usage: /command?parameter1=1&parameter2=2 or /status"
+        result = f"""Wellcome to WarehouseSimulator, list of supported requests:
+/status
+    check status of warehouse
+/command?{self._p_operationId}=1&{self._p_containerId}=1
+    call the operation, where
+    {self._p_operationId}: [1, 2]
+        1 - move container to table
+        2 - move container to rack
+    {self._p_containerId}: [1, 60]
+"""
         self.wfile.write(result.encode('utf-8'))
 
     def _set_headers(self):
@@ -50,14 +62,16 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _do_command(self):
         parameters = parse_qs(urlparse(self.path).query)
-        parameter1 = int(parameters['parameter1'][0]) if parameters['parameter1'][0].isdigit() else None
-        parameter2 = int(parameters['parameter2'][0]) if parameters['parameter2'][0].isdigit() else None
+        operationId = int(parameters[self._p_operationId][0]) if parameters[self._p_operationId][0].isdigit() else None
+        containerId = int(parameters[self._p_containerId][0]) if parameters[self._p_containerId][0].isdigit() else None
         # TODO: переделать на очередь сообщений
         # operation
-        activity_id = parameter1 * 100 + parameter2
+        activity_id = operationId * 100 + containerId
         activity = f'activity_{activity_id}'
         timeEstimated = activities[activity]['duration']
-        result = {'parameter1': parameter1, 'parameter2': parameter2, 'timeEstimated': timeEstimated}
+        result = {f'{self._p_operationId}': operationId,
+                  f'{self._p_containerId}': containerId,
+                  'timeEstimated': timeEstimated}
         if videoPlayer.is_playing:
             result = {'status': 'playing'}
         else:
@@ -78,7 +92,7 @@ class WebService:
     _httpd: HTTPServer = None
 
     def run(self, event):
-        self._httpd = HTTPServer((self._serverName, self._serverPort), SimpleHTTPRequestHandler)
+        self._httpd = HTTPServer((self._serverName, self._serverPort), WebServiceHTTPRequestHandler)
         logging.debug("WebService started")
         while not event.is_set():
             self._httpd.handle_request()
