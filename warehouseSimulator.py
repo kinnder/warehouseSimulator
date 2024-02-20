@@ -11,9 +11,9 @@ import requests
 NO_OPERATION = 'activity_0'
 
 activities = {
-    'activity_0': {'video': 'NoOperation.mp4', 'duration': 15},
-    'activity_101': {'video': 'Container_01_MoveToTable.mp4', 'duration': 40},
-    'activity_201': {'video': 'Container_01_MoveToRack.mp4', 'duration': 40}
+    'activity_0': {'video': 'NoOperation.mp4', 'duration': 5},
+    'activity_101': {'video': 'Container_01_MoveToTable.mp4', 'duration': 15},
+    'activity_201': {'video': 'Container_01_MoveToRack.mp4', 'duration': 15}
 }
 
 
