@@ -87,7 +87,8 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         activity = f'activity_{operationId * 100 + containerId}'
         if activity not in activities.keys():
             activity = NO_OPERATION
-            #TODO operationId выставлять равным NO_OPERATION
+            operationId = 0
+            containerId = 0
         timeEstimated = activities[activity]['duration']
         result = {f'{self._c_operationId}': operationId,
                   f'{self._c_containerId}': containerId,
