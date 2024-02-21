@@ -13,7 +13,9 @@ NO_OPERATION = 'activity_0'
 activities = {
     'activity_0': {'video': 'NoOperation.mp4', 'duration': 5},
     'activity_101': {'video': 'Container_01_MoveToTable.mp4', 'duration': 15},
-    'activity_201': {'video': 'Container_01_MoveToRack.mp4', 'duration': 15}
+    'activity_201': {'video': 'Container_01_MoveToRack.mp4', 'duration': 15},
+    'activity_102': {'video': 'Container_02_MoveToTable.mp4', 'duration': 16},
+    'activity_202': {'video': 'Container_02_MoveToRack.mp4', 'duration': 16}
 }
 
 
@@ -44,8 +46,9 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
-        #TODO в help добавить / запрос
         result = f"""Wellcome to WarehouseSimulator, list of supported requests:
+/
+    show usage help
 /status
     check status of warehouse
 /command?{self._c_operationId}=1&{self._c_containerId}=1
