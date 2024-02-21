@@ -42,9 +42,17 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         else:
             self._do_usage()
 
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Methods', 'GET')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Headers', 'Access-Control-Allow-Origin')
+        self.end_headers()
+
     def _do_usage(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
+        self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
         result = f"""Wellcome to WarehouseSimulator, list of supported requests:
 /
@@ -63,6 +71,7 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
 
     def _do_status(self):
