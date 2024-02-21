@@ -54,3 +54,9 @@ if __name__ == "__main__":
 
     # https://drive.google.com/file/d/1OaTmVB28XK1xXW_XtVWOzi5BvBPvNCUa/view?usp=sharing
     download_file_from_google_drive('1OaTmVB28XK1xXW_XtVWOzi5BvBPvNCUa', 'Container_01_MoveToRack.mp4')
+
+    # https://drive.google.com/file/d/1lyajhzb3xDVpb9zJXhUDdvJOF2pIHkXT/view?usp=sharing
+    download_file_from_google_drive('1lyajhzb3xDVpb9zJXhUDdvJOF2pIHkXT', 'Container_02_MoveToTable.mp4')
+
+    # https://drive.google.com/file/d/198SC97NfiD-u8B5CZ_C5rkW2jFdGc4Lb/view?usp=sharing
+    download_file_from_google_drive('198SC97NfiD-u8B5CZ_C5rkW2jFdGc4Lb', 'Container_02_MoveToRack.mp4')
