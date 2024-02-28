@@ -36,6 +36,9 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         logging.info(f"{self.client_address[0]} - {args[0]}")
         # BaseHTTPRequestHandler.log_message(self, format, *args)
 
+    def do_POST(self):
+        self._set_headers()
+
     def do_GET(self):
         if self.path.startswith('/command'):
             self._do_command()
@@ -134,7 +137,7 @@ class WebService:
         logging.debug("WebService finished")
 
     def stop(self):
-        requests.get(f'http://localhost:{self._serverPort}')
+        requests.post(f'http://localhost:{self._serverPort}')
 
 
 class VideoPlayer:
