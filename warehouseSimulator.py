@@ -15,7 +15,9 @@ activities = {
     'activity_101': {'video': 'Container_01_MoveToTable.mp4', 'duration': 15},
     'activity_201': {'video': 'Container_01_MoveToRack.mp4', 'duration': 15},
     'activity_102': {'video': 'Container_02_MoveToTable.mp4', 'duration': 16},
-    'activity_202': {'video': 'Container_02_MoveToRack.mp4', 'duration': 16}
+    'activity_202': {'video': 'Container_02_MoveToRack.mp4', 'duration': 16},
+    'activity_103': {'video': 'Container_03_MoveToTable.mp4', 'duration': 17},
+    'activity_203': {'video': 'Container_03_MoveToRack.mp4', 'duration': 17}
 }
 
 
