@@ -97,6 +97,7 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(result).encode('utf-8'))
 
     def _do_command(self):
+        # TODO: сделать параметры запросов глобальными и перенести их вычленение в отдельную функцию
         parameters = parse_qs(urlparse(self.path).query)
         operationId = 0
         if self.OPERATION_ID in parameters.keys():
@@ -126,6 +127,7 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(result).encode('utf-8'))
 
     def _do_simulate(self):
+        # TODO: Добавить команду simulate
         pass
 
 
@@ -157,6 +159,7 @@ class VideoPlayer:
     is_playing = False
 
     def schedule_video(self, video_name):
+        # TODO: добавить планирование нескольких видео
         with self._lock:
             self._video_name = video_name
 
@@ -196,6 +199,7 @@ class VideoPlayer:
 
 
 if __name__ == "__main__":
+    # TODO: Добавить разные параметры запуска
     logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO, datefmt="%H:%M:%S")
     logging.getLogger().setLevel(logging.INFO)
     # logging.getLogger().setLevel(logging.DEBUG)
