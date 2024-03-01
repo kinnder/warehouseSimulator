@@ -22,15 +22,15 @@ activities = {
 
 
 class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
-    _c_operationId = 'operationId'
-    _c_containerId = 'containerId'
+    OPERATION_ID = 'operationId'
+    CONTAINER_ID = 'containerId'
 
-    _c_status = 'status'
-    _c_status_playing = 'playing'
-    _c_status_finished = 'finished'
-    _c_status_started = 'started'
+    STATUS = 'status'
+    STATUS_PLAYING = 'playing'
+    STATUS_FINISHED = 'finished'
+    STATUS_STARTED = 'started'
 
-    _c_timeEstimated = 'timeEstimated'
+    TIME_ESTIMATED = 'timeEstimated'
 
     def log_message(self, format, *args):
         logging.info(f"{self.client_address[0]} - {args[0]}")
@@ -64,12 +64,12 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
     show usage help
 /status
     check status of warehouse
-/command?{self._c_operationId}=1&{self._c_containerId}=1
+/command?{self.OPERATION_ID}=1&{self.CONTAINER_ID}=1
     call the operation, where
-    {self._c_operationId}: [1, 2]
+    {self.OPERATION_ID}: [1, 2]
         1 - move container to table
         2 - move container to rack
-    {self._c_containerId}: [1, 60]
+    {self.CONTAINER_ID}: [1, 60]
 """
         self.wfile.write(result.encode('utf-8'))
 
@@ -81,22 +81,22 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _do_status(self):
         # processing request
-        status = self._c_status_playing if videoPlayer.is_playing else self._c_status_finished
+        status = self.STATUS_PLAYING if videoPlayer.is_playing else self.STATUS_FINISHED
         #
-        result = {f'{self._c_status}': status}
+        result = {f'{self.STATUS}': status}
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
 
     def _do_command(self):
         parameters = parse_qs(urlparse(self.path).query)
         operationId = 0
-        if self._c_operationId in parameters.keys():
-            if parameters[self._c_operationId][0].isdigit():
-                operationId = int(parameters[self._c_operationId][0])
+        if self.OPERATION_ID in parameters.keys():
+            if parameters[self.OPERATION_ID][0].isdigit():
+                operationId = int(parameters[self.OPERATION_ID][0])
         containerId = 0
-        if self._c_containerId in parameters.keys():
-            if parameters[self._c_containerId][0].isdigit():
-                containerId = int(parameters[self._c_containerId][0])
+        if self.CONTAINER_ID in parameters.keys():
+            if parameters[self.CONTAINER_ID][0].isdigit():
+                containerId = int(parameters[self.CONTAINER_ID][0])
         # processing request
         activity = f'activity_{operationId * 100 + containerId}'
         if activity not in activities.keys():
@@ -104,12 +104,12 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
             operationId = 0
             containerId = 0
         timeEstimated = activities[activity]['duration']
-        result = {f'{self._c_operationId}': operationId,
-                  f'{self._c_containerId}': containerId,
-                  f'{self._c_timeEstimated}': timeEstimated,
-                  f'{self._c_status}': self._c_status_started}
+        result = {f'{self.OPERATION_ID}': operationId,
+                  f'{self.CONTAINER_ID}': containerId,
+                  f'{self.TIME_ESTIMATED}': timeEstimated,
+                  f'{self.STATUS}': self.STATUS_STARTED}
         if videoPlayer.is_playing:
-            result = {f'{self._c_status}': self._c_status_playing}
+            result = {f'{self.STATUS}': self.STATUS_PLAYING}
         else:
             videoPlayer.schedule_video(activities[activity]['video'])
         #
