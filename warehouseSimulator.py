@@ -22,6 +22,11 @@ activities = {
 
 
 class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
+    URL_COMMAND = '/command'
+    URL_STATUS = '/status'
+    URL_USAGE = '/'
+    URL_SIMULATE = '/simulate'
+
     OPERATION_ID = 'operationId'
     CONTAINER_ID = 'containerId'
 
@@ -34,16 +39,17 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         logging.info(f"{self.client_address[0]} - {args[0]}")
-        # BaseHTTPRequestHandler.log_message(self, format, *args)
 
     def do_POST(self):
         self._set_headers()
 
     def do_GET(self):
-        if self.path.startswith('/command'):
+        if self.path.startswith(self.URL_COMMAND):
             self._do_command()
-        elif self.path.startswith('/status'):
+        elif self.path.startswith(self.URL_STATUS):
             self._do_status()
+        elif self.path.startswith(self.URL_SIMULATE):
+            self._do_simulate()
         else:
             self._do_usage()
 
@@ -60,15 +66,18 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
         result = f"""Wellcome to WarehouseSimulator, list of supported requests:
-/
+{self.URL_USAGE}
     show usage help
-/status
+{self.URL_STATUS}
     check status of warehouse
-/command?{self.OPERATION_ID}=1&{self.CONTAINER_ID}=1
+{self.URL_COMMAND}?{self.OPERATION_ID}=1&{self.CONTAINER_ID}=1
     call the operation, where
     {self.OPERATION_ID}: [1, 2]
         1 - move container to table
         2 - move container to rack
+    {self.CONTAINER_ID}: [1, 60]
+{self.URL_SIMULATE}?{self.CONTAINER_ID}=1
+    call the simulation of pick and place cycle
     {self.CONTAINER_ID}: [1, 60]
 """
         self.wfile.write(result.encode('utf-8'))
@@ -115,6 +124,9 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         #
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
+
+    def _do_simulate(self):
+        pass
 
 
 class WebService:
