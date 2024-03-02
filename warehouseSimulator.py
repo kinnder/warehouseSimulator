@@ -36,6 +36,7 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
     URL_STATUS = '/status'
     URL_USAGE = '/'
     URL_SIMULATE = '/simulate'
+    URL_UI = '/ui'
 
     OPERATION_ID = 'operationId'
     CONTAINER_ID = 'containerId'
@@ -60,6 +61,8 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
             self._do_status()
         elif self.path.startswith(self.URL_SIMULATE):
             self._do_simulate()
+        elif self.path.startswith(self.URL_UI):
+            self._do_ui()
         else:
             self._do_usage()
 
@@ -78,6 +81,8 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         result = f"""Wellcome to WarehouseSimulator, list of supported requests:
 {self.URL_USAGE}
     show usage help
+{self.URL_UI}
+    show web interface
 {self.URL_STATUS}
     check status of warehouse
 {self.URL_COMMAND}?{self.OPERATION_ID}=1&{self.CONTAINER_ID}=1
@@ -170,6 +175,64 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         #
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
+
+    def _do_ui(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        result = """
+<!doctype html>
+<html>
+<head>
+	<title>Warehouse Simulator</title>
+</head>
+<body>
+<table>
+	<tr><td colspan="2"><input type="range" min="1" max="60" value="1" id="containerId" oninput="chooseContainer()"><p>Value: <span id="containerIdValue">1</span></p></td></tr>
+	<tr><td><button onclick="moveToTable()">To Table</button></td><td><button onclick="moveToRack()">To Rack</button></td></tr>
+	<tr><td colspan="2"><button onclick="simulate()">Simulate</button></td></tr>
+	<tr><td colspan="2"><button onclick="status()">Status</button></td></tr>
+	<tr><td colspan="2"><p id="statusValue"></p></td></tr>
+</table>
+</body>
+<script>
+function moveToTable() {
+	var containerId = document.getElementById("containerId").value;
+	makeRequest(`/command?operationId=1&containerId=${containerId}`);
+}
+function moveToRack() {
+	var containerId = document.getElementById("containerId").value;
+	makeRequest(`/command?operationId=2&containerId=${containerId}`);
+}
+function simulate() {
+	var containerId = document.getElementById("containerId").value;
+	makeRequest(`/simulate?containerId=${containerId}`);
+}
+function status() {
+	makeRequest("/status");
+}
+function makeRequest(request) {
+	const xhr = new XMLHttpRequest();
+	xhr.open("GET", "http://localhost:8000" + request);
+	xhr.setRequestHeader('Access-Control-Allow-Origin', 'localhost:8000');
+	xhr.send()
+	xhr.onreadystatechange = () => {
+		if (xhr.readyState == 4 && xhr.status == 200) {
+			var status = document.getElementById("statusValue")
+			status.innerHTML = xhr.response
+		}
+	};
+}
+function chooseContainer() {
+	var slider = document.getElementById("containerId")
+	var output = document.getElementById("containerIdValue")
+	output.innerHTML = slider.value;
+}
+</script>
+</html>
+"""
+        self.wfile.write(result.encode('utf-8'))
 
 
 class WebService:
