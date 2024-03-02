@@ -91,7 +91,7 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _do_status(self):
         # processing request
-        status = self.STATUS_PLAYING if videoPlayer.is_playing else self.STATUS_FINISHED
+        status = self.STATUS_PLAYING if videoPlayer._has_Task else self.STATUS_FINISHED
         #
         result = {f'{self.STATUS}': status}
         self._set_headers()
@@ -119,10 +119,12 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
                   f'{self.CONTAINER_ID}': containerId,
                   f'{self.TIME_ESTIMATED}': timeEstimated,
                   f'{self.STATUS}': self.STATUS_STARTED}
-        if videoPlayer.is_playing:
+        if videoPlayer._has_Task:
             result = {f'{self.STATUS}': self.STATUS_PLAYING}
         else:
-            videoPlayer.schedule_video(activities[activity]['video'])
+            videoPlayer.schedule_videos([
+                activities[activity]['video']
+            ])
         #
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
@@ -149,11 +151,13 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         result = {f'{self.CONTAINER_ID}': containerId,
                   f'{self.TIME_ESTIMATED}': timeEstimated,
                   f'{self.STATUS}': self.STATUS_STARTED}
-        if videoPlayer.is_playing:
+        if videoPlayer._has_Task:
             result = {f'{self.STATUS}': self.STATUS_PLAYING}
         else:
-            videoPlayer.schedule_video(activities[activity_1]['video'])
-            videoPlayer.schedule_video(activities[activity_2]['video'])
+            videoPlayer.schedule_videos([
+                activities[activity_1]['video'],
+                activities[activity_2]['video']
+            ])
         #
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
@@ -184,40 +188,40 @@ class WebService:
 
 class VideoPlayer:
     _frameName = "visualization"
-    is_playing = False
 
-    def schedule_video(self, video_name):
-        # TODO: добавить планирование нескольких видео
+    def schedule_videos(self, video_names:list):
         with self._lock:
-            self._video_name = video_name
+            for video_name in video_names:
+                self._video_queue.put(video_name)
+            self._has_Task = True
 
     def play_video(self):
-        self.is_playing = True
-        cap = cv2.VideoCapture(self._video_name)
-        logging.info(f'playing video: {self._video_name}')
-        logging.debug(f'{self._video_name}: started')
+        video_name = self._video_queue.get()
+        cap = cv2.VideoCapture(video_name)
+        logging.info(f'playing video: {video_name}')
+        logging.debug(f'{video_name}: started')
         while cap.isOpened():
             ret, frame = cap.read()
             if frame is None:
                 break
             cv2.imshow(self._frameName, frame)
             cv2.waitKey(1)
-        logging.debug(f'{self._video_name}: finished')
+        logging.debug(f'{video_name}: finished')
         cap.release()
-        self.is_playing = False
 
     _lock = threading.Lock()
     _video_queue = queue.Queue()
-    _video_name = None
+    _has_Task = False
 
     def run(self, event):
         cv2.namedWindow(self._frameName, cv2.WINDOW_NORMAL)
         cv2.setWindowProperty(self._frameName, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         logging.debug("VideoPlayer started")
         while not event.is_set():
-            if self._video_name is not None:
-                self.play_video()
-                self._video_name = None
+            if self._has_Task:
+                while not self._video_queue.empty():
+                    self.play_video()
+                self._has_Task = False
             else:
                 pass
         cv2.destroyAllWindows()
@@ -237,12 +241,14 @@ if __name__ == "__main__":
     webService = WebService(videoPlayer)
     stopEvent = threading.Event()
 
-    videoPlayer.schedule_video(activities[NO_OPERATION]['video'])
-
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         executor.submit(webService.run, stopEvent)
         executor.submit(videoPlayer.run, stopEvent)
         logging.info("WarehouseSimulator started")
+
+        videoPlayer.schedule_videos([
+            activities[NO_OPERATION]['video']
+        ])
 
         input("Press Enter to stop...\n")
         stopEvent.set()
