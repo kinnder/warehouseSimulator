@@ -7,6 +7,7 @@
 <table>
 	<tr><td colspan="2"><input type="range" min="1" max="60" value="1" id="containerId" oninput="chooseContainer()"><p>Value: <span id="containerIdValue">1</span></p></td></tr>
 	<tr><td><button onclick="moveToTable()">Взять</button></td><td><button onclick="moveToRack()">Положить</button></td></tr>
+	<tr><td colspan="2"><button onclick="simulate()">Симуляция</button></td></tr>
 	<tr><td colspan="2"><button onclick="status()">Статус</button></td></tr>
 	<tr><td colspan="2"><p id="statusValue"></p></td></tr>
 </table>
@@ -35,6 +36,19 @@ function moveToRack() {
 	xhr.setRequestHeader('Access-Control-Allow-Origin', 'localhost:8000');
 	xhr.send()
 	xhr.onreadystatechange = () => {		
+		if (xhr.readyState == 4 && xhr.status == 200) {
+			status.innerHTML = xhr.response
+		}
+	};
+}
+function simulate() {
+	var containerId = document.getElementById("containerId").value
+	const xhr = new XMLHttpRequest();
+	var status = document.getElementById("statusValue")
+	xhr.open("GET", `http://localhost:8000/simulate?containerId=${containerId}`);
+	xhr.setRequestHeader('Access-Control-Allow-Origin', 'localhost:8000');
+	xhr.send()
+	xhr.onreadystatechange = () => {
 		if (xhr.readyState == 4 && xhr.status == 200) {
 			status.innerHTML = xhr.response
 		}
