@@ -14,54 +14,28 @@
 </body>
 <script>
 function moveToTable() {
-	var operationId = 1
-	var containerId = document.getElementById("containerId").value
-	const xhr = new XMLHttpRequest();
-	var status = document.getElementById("statusValue")
-	xhr.open("GET", `http://localhost:8000/command?operationId=${operationId}&containerId=${containerId}`);
-	xhr.setRequestHeader('Access-Control-Allow-Origin', 'localhost:8000');
-	xhr.send()
-	xhr.onreadystatechange = () => {		
-		if (xhr.readyState == 4 && xhr.status == 200) {
-			status.innerHTML = xhr.response
-		}
-	};
+	var containerId = document.getElementById("containerId").value;
+	makeRequest(`/command?operationId=1&containerId=${containerId}`);
 }
 function moveToRack() {
-	var operationId = 2
-	var containerId = document.getElementById("containerId").value
-	const xhr = new XMLHttpRequest();
-	var status = document.getElementById("statusValue")
-	xhr.open("GET", `http://localhost:8000/command?operationId=${operationId}&containerId=${containerId}`);
-	xhr.setRequestHeader('Access-Control-Allow-Origin', 'localhost:8000');
-	xhr.send()
-	xhr.onreadystatechange = () => {		
-		if (xhr.readyState == 4 && xhr.status == 200) {
-			status.innerHTML = xhr.response
-		}
-	};
+	var containerId = document.getElementById("containerId").value;
+	makeRequest(`/command?operationId=2&containerId=${containerId}`);
 }
 function simulate() {
-	var containerId = document.getElementById("containerId").value
+	var containerId = document.getElementById("containerId").value;
+	makeRequest(`/simulate?containerId=${containerId}`);
+}
+function status() {
+	makeRequest("/status");
+}
+function makeRequest(request) {
 	const xhr = new XMLHttpRequest();
-	var status = document.getElementById("statusValue")
-	xhr.open("GET", `http://localhost:8000/simulate?containerId=${containerId}`);
+	xhr.open("GET", "http://localhost:8000" + request);
 	xhr.setRequestHeader('Access-Control-Allow-Origin', 'localhost:8000');
 	xhr.send()
 	xhr.onreadystatechange = () => {
 		if (xhr.readyState == 4 && xhr.status == 200) {
-			status.innerHTML = xhr.response
-		}
-	};
-}
-function status() {	
-	const xhr = new XMLHttpRequest();
-	var status = document.getElementById("statusValue")
-	xhr.open("GET", "http://localhost:8000/status");
-	xhr.setRequestHeader('Access-Control-Allow-Origin', 'localhost:8000');
-	xhr.send()
-	xhr.onreadystatechange = () => {		
-		if (xhr.readyState == 4 && xhr.status == 200) {
+			var status = document.getElementById("statusValue")
 			status.innerHTML = xhr.response
 		}
 	};
