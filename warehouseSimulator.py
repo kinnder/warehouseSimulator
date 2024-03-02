@@ -2,6 +2,7 @@ import concurrent.futures
 import json
 import logging
 import queue
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
@@ -164,11 +165,12 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 class WebService:
-    # _serverName = '0.0.0.0'
     _serverName = 'localhost'
     _serverPort = 8000
 
-    def __init__(self, videoPlayer):
+    def __init__(self, serverName, serverPort, videoPlayer):
+        self._serverName = serverName
+        self._serverPort = serverPort
         self._videoPlayer = videoPlayer
 
     _videoPlayer: None
@@ -189,7 +191,7 @@ class WebService:
 class VideoPlayer:
     _frameName = "visualization"
 
-    def schedule_videos(self, video_names:list):
+    def schedule_videos(self, video_names: list):
         with self._lock:
             for video_name in video_names:
                 self._video_queue.put(video_name)
@@ -231,14 +233,33 @@ class VideoPlayer:
         pass
 
 
+APP_MODE_DEBUG = 1
+APP_MODE_RELEASE = 2
+
 if __name__ == "__main__":
-    # TODO: Добавить разные параметры запуска
+    app_mode = APP_MODE_DEBUG
+
+    if len(sys.argv) > 1 and sys.argv[1] == 'release':
+        app_mode = APP_MODE_RELEASE
+        print(sys.argv[1])
+
+    if len(sys.argv) > 1 and sys.argv[1] == 'debug':
+        app_mode = APP_MODE_DEBUG
+        print(sys.argv[1])
+
     logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO, datefmt="%H:%M:%S")
-    logging.getLogger().setLevel(logging.INFO)
-    # logging.getLogger().setLevel(logging.DEBUG)
+    serverName = None
+    serverPort = 8000
+    if app_mode == APP_MODE_DEBUG:
+        logging.getLogger().setLevel(logging.DEBUG)
+        serverName = 'localhost'
+    else:
+        logging.getLogger().setLevel(logging.INFO)
+        serverName = '0.0.0.0'
+    logging.info(f"Application started in {"debug" if app_mode == APP_MODE_DEBUG else "release"} mode")
 
     videoPlayer = VideoPlayer()
-    webService = WebService(videoPlayer)
+    webService = WebService(serverName, serverPort, videoPlayer)
     stopEvent = threading.Event()
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
