@@ -1,6 +1,7 @@
 import concurrent.futures
 import json
 import logging
+import queue
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
@@ -127,8 +128,35 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(result).encode('utf-8'))
 
     def _do_simulate(self):
-        # TODO: Добавить команду simulate
-        pass
+        # TODO: сделать параметры запросов глобальными и перенести их вычленение в отдельную функцию
+        parameters = parse_qs(urlparse(self.path).query)
+        containerId = 0
+        if self.CONTAINER_ID in parameters.keys():
+            if parameters[self.CONTAINER_ID][0].isdigit():
+                containerId = int(parameters[self.CONTAINER_ID][0])
+        # processing request
+        activity_1 = f'activity_{1 * 100 + containerId}'
+        if activity_1 not in activities.keys():
+            activity_1 = NO_OPERATION
+            containerId = 0
+        activity_2 = f'activity_{2 * 100 + containerId}'
+        if activity_2 not in activities.keys():
+            activity_2 = NO_OPERATION
+            containerId = 0
+        timeEstimated = 0
+        timeEstimated += activities[activity_1]['duration']
+        timeEstimated += activities[activity_2]['duration']
+        result = {f'{self.CONTAINER_ID}': containerId,
+                  f'{self.TIME_ESTIMATED}': timeEstimated,
+                  f'{self.STATUS}': self.STATUS_STARTED}
+        if videoPlayer.is_playing:
+            result = {f'{self.STATUS}': self.STATUS_PLAYING}
+        else:
+            videoPlayer.schedule_video(activities[activity_1]['video'])
+            videoPlayer.schedule_video(activities[activity_2]['video'])
+        #
+        self._set_headers()
+        self.wfile.write(json.dumps(result).encode('utf-8'))
 
 
 class WebService:
@@ -179,6 +207,7 @@ class VideoPlayer:
         self.is_playing = False
 
     _lock = threading.Lock()
+    _video_queue = queue.Queue()
     _video_name = None
 
     def run(self, event):
@@ -206,17 +235,17 @@ if __name__ == "__main__":
 
     videoPlayer = VideoPlayer()
     webService = WebService(videoPlayer)
-    event = threading.Event()
+    stopEvent = threading.Event()
 
     videoPlayer.schedule_video(activities[NO_OPERATION]['video'])
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-        executor.submit(webService.run, event)
-        executor.submit(videoPlayer.run, event)
+        executor.submit(webService.run, stopEvent)
+        executor.submit(videoPlayer.run, stopEvent)
         logging.info("WarehouseSimulator started")
 
         input("Press Enter to stop...\n")
-        event.set()
+        stopEvent.set()
         webService.stop()
         videoPlayer.stop()
         logging.info("WarehouseSimulator finished")
