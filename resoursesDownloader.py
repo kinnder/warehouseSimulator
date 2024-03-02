@@ -1,10 +1,18 @@
 import sys
+from pathlib import Path
+
 import requests
 
 
 # https://stackoverflow.com/questions/38511444/python-download-files-from-google-drive-using-url
 def download_file_from_google_drive(file_id, destination):
     URL = "https://docs.google.com/uc?export=download&confirm=1"
+
+    if Path(destination).is_file():
+        print(f"{destination} already exists")
+        return None
+    else:
+        print(f"{destination} downloading")
 
     session = requests.Session()
 
@@ -66,3 +74,27 @@ if __name__ == "__main__":
 
     # https://drive.google.com/file/d/1RrLw93ydqrdswG9wybT18MMsKyn2gWGM/view?usp=sharing
     download_file_from_google_drive('1RrLw93ydqrdswG9wybT18MMsKyn2gWGM', 'Container_03_MoveToRack.mp4')
+
+    # https://drive.google.com/file/d/1mUK0WxfI96tMvp9mDu3LFnLfNlydTzjT/view?usp=sharing
+    download_file_from_google_drive('1mUK0WxfI96tMvp9mDu3LFnLfNlydTzjT', 'Container_04_MoveToTable.mp4')
+
+    # https://drive.google.com/file/d/1zQDD1VeI0f4vC58ibpbFkhU2CdKTpsRH/view?usp=sharing
+    download_file_from_google_drive('1zQDD1VeI0f4vC58ibpbFkhU2CdKTpsRH', 'Container_04_MoveToRack.mp4')
+
+    # https://drive.google.com/file/d/1zvUOqIMCDCeVERkU_XcvDbTWcI-KXbtz/view?usp=sharing
+    download_file_from_google_drive('1zvUOqIMCDCeVERkU_XcvDbTWcI-KXbtz', 'Container_05_MoveToTable.mp4')
+
+    # https://drive.google.com/file/d/1arHi_0QeNRh1JjWlmap8jiAUqcwkpsBZ/view?usp=sharing
+    download_file_from_google_drive('1arHi_0QeNRh1JjWlmap8jiAUqcwkpsBZ', 'Container_05_MoveToRack.mp4')
+
+    # https://drive.google.com/file/d/1pdvgjId3hPzGwv17MoHSpiZRGSYeuKfi/view?usp=sharing
+    download_file_from_google_drive('1pdvgjId3hPzGwv17MoHSpiZRGSYeuKfi', 'Container_06_MoveToTable.mp4')
+
+    # https://drive.google.com/file/d/1fxyANflvIWyoG3qNLu1atfEYQcqkPMs2/view?usp=sharing
+    download_file_from_google_drive('1fxyANflvIWyoG3qNLu1atfEYQcqkPMs2', 'Container_06_MoveToRack.mp4')
+
+    # https://drive.google.com/file/d/1R5SlmLvA3Z6YRqb-FnwSWNtHLvfwnPtR/view?usp=sharing
+    download_file_from_google_drive('1R5SlmLvA3Z6YRqb-FnwSWNtHLvfwnPtR', 'Container_07_MoveToTable.mp4')
+
+    # https://drive.google.com/file/d/1CGX8pO0J3VDDZqVSKpUBhOgy94U9LXDV/view?usp=sharing
+    download_file_from_google_drive('1CGX8pO0J3VDDZqVSKpUBhOgy94U9LXDV', 'Container_07_MoveToRack.mp4')

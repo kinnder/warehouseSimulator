@@ -19,7 +19,15 @@ activities = {
     'activity_102': {'video': 'Container_02_MoveToTable.mp4', 'duration': 16},
     'activity_202': {'video': 'Container_02_MoveToRack.mp4', 'duration': 16},
     'activity_103': {'video': 'Container_03_MoveToTable.mp4', 'duration': 17},
-    'activity_203': {'video': 'Container_03_MoveToRack.mp4', 'duration': 17}
+    'activity_203': {'video': 'Container_03_MoveToRack.mp4', 'duration': 17},
+    'activity_104': {'video': 'Container_04_MoveToTable.mp4', 'duration': 18},
+    'activity_204': {'video': 'Container_04_MoveToRack.mp4', 'duration': 18},
+    'activity_105': {'video': 'Container_05_MoveToTable.mp4', 'duration': 18},
+    'activity_205': {'video': 'Container_05_MoveToRack.mp4', 'duration': 18},
+    'activity_106': {'video': 'Container_06_MoveToTable.mp4', 'duration': 19},
+    'activity_206': {'video': 'Container_06_MoveToRack.mp4', 'duration': 19},
+    'activity_107': {'video': 'Container_07_MoveToTable.mp4', 'duration': 19},
+    'activity_207': {'video': 'Container_07_MoveToRack.mp4', 'duration': 19}
 }
 
 
