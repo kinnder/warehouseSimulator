@@ -27,7 +27,13 @@ activities = {
     'activity_106': {'video': 'Container_06_MoveToTable.mp4', 'duration': 19},
     'activity_206': {'video': 'Container_06_MoveToRack.mp4', 'duration': 19},
     'activity_107': {'video': 'Container_07_MoveToTable.mp4', 'duration': 19},
-    'activity_207': {'video': 'Container_07_MoveToRack.mp4', 'duration': 19}
+    'activity_207': {'video': 'Container_07_MoveToRack.mp4', 'duration': 19},
+    'activity_108': {'video': 'Container_08_MoveToTable.mp4', 'duration': 20},
+    'activity_208': {'video': 'Container_08_MoveToRack.mp4', 'duration': 20},
+    'activity_109': {'video': 'Container_09_MoveToTable.mp4', 'duration': 21},
+    'activity_209': {'video': 'Container_09_MoveToRack.mp4', 'duration': 21},
+    'activity_110': {'video': 'Container_10_MoveToTable.mp4', 'duration': 22},
+    'activity_210': {'video': 'Container_10_MoveToRack.mp4', 'duration': 22}
 }
 
 

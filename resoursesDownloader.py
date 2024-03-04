@@ -98,3 +98,21 @@ if __name__ == "__main__":
 
     # https://drive.google.com/file/d/1CGX8pO0J3VDDZqVSKpUBhOgy94U9LXDV/view?usp=sharing
     download_file_from_google_drive('1CGX8pO0J3VDDZqVSKpUBhOgy94U9LXDV', 'Container_07_MoveToRack.mp4')
+
+    # https://drive.google.com/file/d/17NDsxSysw1RlFNYdcI_PPad4kRX1lyZU/view?usp=sharing
+    download_file_from_google_drive('17NDsxSysw1RlFNYdcI_PPad4kRX1lyZU', 'Container_08_MoveToTable.mp4')
+
+    # https://drive.google.com/file/d/1YsA5FI0CjSRGaVrV9zHFcjQ74-EKBv5q/view?usp=sharing
+    download_file_from_google_drive('1YsA5FI0CjSRGaVrV9zHFcjQ74-EKBv5q', 'Container_08_MoveToRack.mp4')
+
+    # https://drive.google.com/file/d/1gibZ8kLFeXvi1OrZUcGU-ZfeuDo_ICSY/view?usp=sharing
+    download_file_from_google_drive('1gibZ8kLFeXvi1OrZUcGU-ZfeuDo_ICSY', 'Container_09_MoveToTable.mp4')
+
+    # https://drive.google.com/file/d/1s0KLIq10KTpZVp3dWtIoSF2Vfvd_cdmb/view?usp=sharing
+    download_file_from_google_drive('1s0KLIq10KTpZVp3dWtIoSF2Vfvd_cdmb', 'Container_09_MoveToRack.mp4')
+
+    # https://drive.google.com/file/d/1XtAZF7Oo9cqxneX3Z3y6SXDW-OFfDRUr/view?usp=sharing
+    download_file_from_google_drive('1XtAZF7Oo9cqxneX3Z3y6SXDW-OFfDRUr', 'Container_10_MoveToTable.mp4')
+
+    # https://drive.google.com/file/d/1wlJGpgD6OK23jkLhoy-1qoYph8GGBiox/view?usp=sharing
+    download_file_from_google_drive('1wlJGpgD6OK23jkLhoy-1qoYph8GGBiox', 'Container_10_MoveToRack.mp4')
