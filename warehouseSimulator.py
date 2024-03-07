@@ -333,7 +333,7 @@ if __name__ == "__main__":
     else:
         logging.getLogger().setLevel(logging.INFO)
         serverName = '0.0.0.0'
-    logging.info(f"Application started in {"debug" if app_mode == APP_MODE_DEBUG else "release"} mode")
+    logging.info(f"Application started in {'debug' if app_mode == APP_MODE_DEBUG else 'release'} mode")
 
     videoPlayer = VideoPlayer()
     webService = WebService(serverName, serverPort, videoPlayer)
