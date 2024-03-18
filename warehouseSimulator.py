@@ -118,16 +118,9 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(result).encode('utf-8'))
 
     def _do_command(self):
-        # TODO: сделать параметры запросов глобальными и перенести их вычленение в отдельную функцию
         parameters = parse_qs(urlparse(self.path).query)
-        operationId = 0
-        if self.OPERATION_ID in parameters.keys():
-            if parameters[self.OPERATION_ID][0].isdigit():
-                operationId = int(parameters[self.OPERATION_ID][0])
-        containerId = 0
-        if self.CONTAINER_ID in parameters.keys():
-            if parameters[self.CONTAINER_ID][0].isdigit():
-                containerId = int(parameters[self.CONTAINER_ID][0])
+        operationId = self._get_parameter(parameters, self.OPERATION_ID)
+        containerId = self._get_parameter(parameters, self.CONTAINER_ID)
         # processing request
         activity = f'activity_{operationId * 100 + containerId}'
         if activity not in activities.keys():
@@ -149,13 +142,14 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
 
+    def _get_parameter(self, parameters: dict[str, list[str]], parameter_name: str) -> int:
+        return int(parameters[parameter_name][0]) \
+            if (parameter_name in parameters.keys() and parameters[parameter_name][0].isdigit()) \
+            else 0
+
     def _do_simulate(self):
-        # TODO: сделать параметры запросов глобальными и перенести их вычленение в отдельную функцию
         parameters = parse_qs(urlparse(self.path).query)
-        containerId = 0
-        if self.CONTAINER_ID in parameters.keys():
-            if parameters[self.CONTAINER_ID][0].isdigit():
-                containerId = int(parameters[self.CONTAINER_ID][0])
+        containerId = self._get_parameter(parameters, self.CONTAINER_ID)
         # processing request
         activity_1 = f'activity_{1 * 100 + containerId}'
         if activity_1 not in activities.keys():
