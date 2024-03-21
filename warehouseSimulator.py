@@ -5,9 +5,8 @@ import queue
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import List, Dict
 from urllib.parse import parse_qs, urlparse
-from typing import List
-from typing import Dict
 
 import cv2
 import requests
