@@ -6,6 +6,8 @@ import sys
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
+from typing import List
+from typing import Dict
 
 import cv2
 import requests
@@ -142,7 +144,7 @@ class WebServiceHTTPRequestHandler(BaseHTTPRequestHandler):
         self._set_headers()
         self.wfile.write(json.dumps(result).encode('utf-8'))
 
-    def _get_parameter(self, parameters: dict[str, list[str]], parameter_name: str) -> int:
+    def _get_parameter(self, parameters: Dict[str, List[str]], parameter_name: str) -> int:
         return int(parameters[parameter_name][0]) \
             if (parameter_name in parameters.keys() and parameters[parameter_name][0].isdigit()) \
             else 0
