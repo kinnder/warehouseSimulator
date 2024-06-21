@@ -1,49 +1,471 @@
 <!doctype html>
-<html>
+<html lang="ru">
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Warehouse Simulator</title>
+	<link
+		rel="stylesheet"
+		href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+	/>
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> -->
 </head>
 <body>
-<table>
-	<tr><td colspan="2"><input type="range" min="1" max="60" value="1" id="containerId" oninput="chooseContainer()"><p>Value: <span id="containerIdValue">1</span></p></td></tr>
-	<tr><td><button onclick="moveToTable()">Взять</button></td><td><button onclick="moveToRack()">Положить</button></td></tr>
-	<tr><td colspan="2"><button onclick="simulate()">Симуляция</button></td></tr>
-	<tr><td colspan="2"><button onclick="status()">Статус</button></td></tr>
-	<tr><td colspan="2"><p id="statusValue"></p></td></tr>
-</table>
-</body>
+	<main class="container">
+		<nav>
+			<ul>
+				<li><strong>Warehouse</strong></li>
+			</ul>
+			<ul>
+				<li>
+					<a href="#" class="secondary" data-tooltip="Статус обновляется каждые 0.5 секунд" data-placement="bottom" onclick="updateStatus()">
+						<span id="statusIcon">🔴</span>
+						<span id="status">Disconnected</span>
+					</a>
+				</li>
+			</ul>
+			<ul>
+				<li><a href="#" class="contrast" onclick="goTo('control')">Управление</a></li>
+				<li><a href="#" class="contrast" onclick="goTo('logs')">Логи</a></li>
+			</ul>
+		</nav>
+
+		<div id="control" class="page active hor-if-pc">
+			<div id="visualizer-grid">
+				<input class="slider" type="range" min="1" max="6" step="1" value="1" id="containerY">
+				<div id="visualizer"></div>
+				<div><input id="containerIdValue" type="number" max="60" min="1" value=""></div>
+				<input class="slider" type="range" min="1" max="10" step="1" value="1" id="containerX">
+			</div>
+			<div class="right-side">
+				<div role="group" style="margin-bottom: 0;">
+					<button id="moveToTable" onclick="moveToTable()">Забрать на стол</button>
+					<button class="secondary" id="moveToRack" onclick="moveToRack()">Вернуть на склад</button>
+				</div>
+				<div role="group">
+					<button class="contrast" id="simulate" onclick="simulate()">Симуляция цикла</button>
+				</div>
+				<!-- <p id="statusValue"></p> -->
+				<progress id="progress" value="0" max="100" />
+			</div>
+		</div>
+
+		<div id="logs" class="page">
+			<div class="heading-button">
+				<h2>Локальные логи</h2>
+				<button class="contrast" onclick="clearLogs()">🗑️</button>
+			</div>
+			<div id="logbox">
+
+			</div>
+		</div>
+	</main>
+	
+
+<style>
+	@media (min-width: 1024px) {
+		.hor-if-pc {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.right-side {
+			width: 40%;
+			margin-top: 30px;
+			margin-inline: 20px;
+		}
+	}
+
+	@media (min-width: 100px) and (max-width: 420px) {
+		#status {
+			display: none !important;
+			visibility: hidden;
+		}
+	}
+
+	@media (max-device-width: 768px) { 
+		#containerY {
+			height: 98% !important;
+			margin-right: -2px !important;
+		}
+
+		#containerX {
+			width: 97% !important;
+			/* margin-top: 28px !important; */
+		}
+
+		#visualizer {
+			grid-gap: 2px !important;
+		}
+	}
+
+	.page {
+		display: none;
+	}
+
+	.page.active {
+		display: block;
+	}
+
+	#logbox {
+		display: flex;
+		flex-direction: column-reverse;
+	}
+
+	.heading-button {
+		display: flex;
+		justify-content: space-between;
+
+		button {
+			width: 40px;
+			height: 40px;
+			background-color: brown;
+			border: 0;
+			padding: 0;
+		}
+	
+	}
+
+	#logbox > p {
+		margin-bottom: 0;
+	}
+
+
+
+	#control {
+		margin-top: 20px;
+	}
+
+	#control .right-side {
+		margin-top: 0;
+	}
+
+	a {
+		text-decoration: none;
+	}
+
+	.container {
+		padding-top: 0;
+	}
+	
+	#status {
+		color: lightcoral;
+	}
+
+	#visualizer-grid {
+		display: grid;
+		height: 55vh;
+		grid-template-columns: 5vh auto;
+		grid-template-rows: auto 5vh;
+		width: 100%;
+	}
+
+	#containerY {
+		writing-mode: vertical-lr;
+		direction: rtl;
+		width: 4vh;
+		height: 89%;
+		margin: auto auto;
+	}
+
+
+	input[type=range]::-webkit-slider-runnable-track  {
+		background: transparent !important;
+	}
+
+
+	#containerX {
+		margin: auto auto;
+		width: 93%;
+	}
+
+	#containerIdValue {
+		border: none;
+		padding: 0px;
+		border-radius: 0px;
+		margin: auto auto;
+		text-align: center;
+		-moz-appearance: textfield;
+		-webkit-appearance: none;
+		appearance: none;
+		height: 100%;
+		background-color: transparent;
+	}
+
+	#visualizer {
+		display: grid;
+		grid-template-columns: repeat(10, 1fr);
+		grid-gap: 4px;
+		width: 100%;
+		height: 100%;
+		grid-auto-flow: dense;
+  		direction: rtl;
+	}
+
+	.square {
+		background-color: #017fc0;
+		/* border: 1px solid black; */
+		box-sizing: border-box;
+	}
+
+	.square.selected {
+		background-color: #0197ff;
+		/* border: 1px solid black; */
+		box-sizing: border-box;
+	}
+	
+	.square::after {
+		content: "";
+		display: block;
+		height: 10%;
+		width: 50%;
+		margin: 20% auto;
+		background-color: black;
+		opacity: 30%;
+	}
+	
+	progress {
+		display: none;
+	}
+</style>
+
+
 <script>
+
+const url = "http://" + window.location.href.split("/")[2].split(":")[0] + ":8000";
+
+var rows = 6;
+var columns = 10;
+var currContainer = 1
+if (localStorage.currContainer) {
+	currContainer = localStorage.currContainer;
+}
+if (localStorage.logbox) {
+	document.getElementById('logbox').innerHTML = localStorage.logbox;
+} else {
+	document.getElementById('logbox').innerHTML = "";
+}
+
+var dontFinish = false;
+
+var containerX = document.getElementById("containerX");
+var containerY = document.getElementById("containerY");
+var squares = document.getElementsByClassName('square');
+var containerInput = document.getElementById('containerIdValue');
+var statusIcon = document.getElementById('statusIcon');
+var statusText = document.getElementById('status');
+var appStatus = "";
+var logbox = document.getElementById('logbox');
+var currPage = "control";
+if (localStorage.currPage) {
+	currPage = localStorage.currPage;
+} else {
+	localStorage.currPage = currPage;
+}
+
+var moveToRackButton = document.getElementById('moveToRack');
+var moveToTableButton = document.getElementById('moveToTable');
+var simulateButton = document.getElementById('simulate');
+var progress = document.getElementById('progress');
+var buttons = document.getElementsByTagName('button');
+
+window.addEventListener('DOMContentLoaded', function() {
+
+	var visualizer = document.getElementById('visualizer');
+	for (var i = 0; i < rows; i++) {
+		for (var j = 0; j < columns; j++) {
+			var square = document.createElement('div');
+			square.classList.add('square');
+			visualizer.appendChild(square);
+		}
+	}
+
+	containerY.addEventListener('input', updateAxis);
+	containerX.addEventListener('input', updateAxis);
+
+	Array.from(visualizer.children).forEach((element, index) => {
+		element.addEventListener('click', function() {
+			currContainer = visualizer.children.length - index;
+			updateAll();
+		});
+	});
+
+	keepAspectRatio();
+	updateAll();
+	updateStatus();
+	
+	goTo(currPage);
+
+	containerInput.addEventListener('change', function() {
+		currContainer = containerInput.value;
+		updateAll();
+	});
+
+	
+});
+
+
+
+function updateAxis(e) {
+	currContainer = Number((containerY.value - 1) * 10) + Number(containerX.value);
+	updateAll();
+}
+
+
+
+function updateAll(e=null) {
+	localStorage.currContainer = currContainer;
+
+	containerX.value = (currContainer - 1) % 10 + 1;
+
+	containerY.value = Math.floor((currContainer - 1) / 10) + 1;
+	
+	for (var i = 0; i < squares.length; i++) {
+		squares[i].classList.remove('selected');
+	}
+	
+	squares[squares.length-currContainer].classList.add('selected');
+
+	
+	containerInput.value = currContainer;
+}
+
+
+
+
+window.addEventListener('resize', keepAspectRatio);
+
+function keepAspectRatio(e=null) {
+	var visualizerGrid = document.getElementById('visualizer-grid');
+	var visualizer = document.getElementById('visualizer');
+	position = visualizer.getBoundingClientRect();
+
+	visualizerGrid.style.height = Math.round(position.width / 10 * 6) + "px";
+}
+
+
 function moveToTable() {
-	var containerId = document.getElementById("containerId").value;
-	makeRequest(`/command?operationId=1&containerId=${containerId}`);
+	moveToTableButton.setAttribute("aria-busy", "true")
+	makeRequest(`/command?operationId=1&containerId=${currContainer}`);
 }
 function moveToRack() {
-	var containerId = document.getElementById("containerId").value;
-	makeRequest(`/command?operationId=2&containerId=${containerId}`);
+	moveToRackButton.setAttribute("aria-busy", "true")
+	makeRequest(`/command?operationId=2&containerId=${currContainer}`);
 }
 function simulate() {
-	var containerId = document.getElementById("containerId").value;
-	makeRequest(`/simulate?containerId=${containerId}`);
+	simulateButton.setAttribute("aria-busy", "true")
+	makeRequest(`/simulate?containerId=${currContainer}`);
 }
-function status() {
-	makeRequest("/status");
+
+function blockControls() {
+	for (var i = 0; i < buttons.length; i++) {
+		buttons[i].disabled = true;
+	}
 }
-function makeRequest(request) {
-	const xhr = new XMLHttpRequest();
-	xhr.open("GET", "http://localhost:8000" + request);
-	xhr.setRequestHeader('Access-Control-Allow-Origin', 'localhost:8000');
-	xhr.send()
-	xhr.onreadystatechange = () => {
-		if (xhr.readyState == 4 && xhr.status == 200) {
-			var status = document.getElementById("statusValue")
-			status.innerHTML = xhr.response
+
+
+function afterAction(actionResult) {
+	dontFinish = true
+	setTimeout(function() {
+		dontFinish = false;
+	}, 2000);
+
+	progress.value = 0;
+	progress.style.display = "block";
+
+	blockControls();
+	
+	var estimateInSeconds = actionResult.timeEstimated / 2.9; // Replace with your estimate in seconds
+	var progressInterval = setInterval(updateProgress, 1000);
+
+	function updateProgress() {
+		progress.value += Math.floor(100 / estimateInSeconds);
+		if (progress.value >= 100) {
+			clearInterval(progressInterval);
+			updateStatus();
 		}
-	};
+	}
 }
-function chooseContainer() {
-	var slider = document.getElementById("containerId")
-	var output = document.getElementById("containerIdValue")
-	output.innerHTML = slider.value;
+
+function finishedAction() {
+	for (var i = 0; i < buttons.length; i++) {
+		buttons[i].disabled = false;
+	}
+
+	moveToRackButton.setAttribute("aria-busy", "false")
+	moveToTableButton.setAttribute("aria-busy", "false")
+	simulateButton.setAttribute("aria-busy", "false")
+	
+	progress.style.display = "none";
 }
+
+function makeRequest(request) {
+	fetch(url + request)
+		.then(response => response.json())
+		.then(data => {
+			if (request == "/status") {
+				appStatus = data.status;
+			} else {
+				afterAction(data);
+				var message = `${new Date().toLocaleTimeString()} — `
+				if (data.operationId !== undefined) {
+					var operation = data.operationId == 1 ? "выдвигается на стол" : "выдвигается на склад";
+					message += `Контейнер ${data.containerId} ${operation}`;
+				} else {
+					message += `Контейнер ${data.containerId} проходит цикл`;
+				}
+				logbox.appendChild(document.createElement('p')).innerHTML = message;
+				localStorage.logbox = logbox.innerHTML;
+			}
+		})
+		.catch(error => {
+			console.error("Error:", error);
+			if (request == "/status") {
+				appStatus = {status: "error"};
+			}
+		});
+}
+
+function updateStatus(e=null) {
+	makeRequest("/status");
+	if (appStatus == "finished") {
+		statusIcon.innerHTML = "🟢";
+		statusText.innerHTML = "Ready";
+		statusText.style.color = "gray";
+		if (!dontFinish) finishedAction();
+	} else if (appStatus == "playing") {
+		statusIcon.innerHTML = "🟡";
+		statusText.innerHTML = "In progress";
+		statusText.style.color = "gray";
+		blockControls();
+	} else {
+		statusIcon.innerHTML = "🔴";
+		statusText.innerHTML = "Disconnected";
+		statusText.style.color = "lightcoral";
+	}
+}
+
+function goTo(page) {
+	var pages = document.getElementsByClassName('page');
+	for (var i = 0; i < pages.length; i++) {
+		pages[i].classList.remove('active');
+	}
+	localStorage.currPage = page;
+	document.getElementById(page).classList.add('active');
+}
+
+function clearLogs() {
+	logbox.innerHTML = "";
+	localStorage.logbox = "";
+}
+
+statusInterval = setInterval(updateStatus, 500);
+
+
 </script>
+
+
+
+</body>
 </html>
